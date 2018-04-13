@@ -124,7 +124,7 @@ See the status of your pool
 
 ![show the swarm pool](https://lh3.googleusercontent.com/eBjzLvpPGChYLmAjTQQrZ4qKTqy2_xlsapSP-9kpwXXu5nd6BfXU8bxitmtvdrQQrQt7eiaG0OxQ3911KodHWOMToKvoiXOMBtGlyJsVCHSdEu174rCZRWMFUDbHwcKyIvW321s2bg=w1132-h137-no)
 
-## Install Rex-Ray for persistant volume with OpenStack Cinder
+## Install Rex-Ray for persistent volume with OpenStack Cinder
 
 ### On each node as root
 
