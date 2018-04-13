@@ -193,6 +193,7 @@ On the worker, you can see the container with this command
     docker ps
 
 Also in the OVH interface (the 5go attached hard drive)
+
 ![persistent volume attached to the worker](https://lh3.googleusercontent.com/ptqWVtAcufLmMSwFOfA5fGTSwpWjLka8R_LeyOLUcMftvgmh5IEQQHehT824IrhlTvw9-L_ztVoXZQhqdQbkDixGQOo9lxa6V36gLinlzSqYqNhCCt4enf0_06cMjh9-voc6pzKCDA=w395-h643-no)
 
 On the worker node, connect to the container and create a new database
