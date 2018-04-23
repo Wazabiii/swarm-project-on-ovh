@@ -35,7 +35,7 @@ For this test we will use:
 Verify and configure (if needed) the network
 
  - /etc/sysconfig/network-scripts/ifcfg-eth0
-- /etc/sysconfig/network-scripts/ifcfg-eth1
+ - /etc/sysconfig/network-scripts/ifcfg-eth1
 
 #### Cleanup some firewall rules
 
@@ -128,8 +128,6 @@ See the status of your pool
 
 ### On each node as root
 
-    curl -sSL https://rexray.io/install | sh
-
 Here you need to change some information:
 - Openstack Username
 - Openstack Password
@@ -139,42 +137,24 @@ Here you need to change some information:
 
 You can find these information inside the OpenRC file. You can follow this guide to download the OpenRC file: https://docs.ovh.com/fr/public-cloud/charger-les-variables-denvironnement-openstack/
 
-
-```
-echo "libstorage:
-  service: cinder
-  integration:
-    volume:
-      operations:
-        mount:
-          preempt: true
-cinder:
-  userName: <Openstack Username>
-  password: <Openstack Password>
-  authURL: https://auth.cloud.ovh.net/v2.0/
-  tenantID: <Openstack Tenant>
-  tenantName: <Openstack Tenant Name>
-  regionName: <Openstack Region e.i: GRA3>
-  availabilityZoneName: nova" > /etc/rexray/config.yml
-```
-
-    systemctl enable rexray
-    
-    systemctl start rexray
+    docker plugin install --grant-all-permissions rexray/cinder:edge \
+    CINDER_AUTHURL=https://auth.cloud.ovh.net/v2.0/ \
+    CINDER_USERNAME=<Openstack Username> \
+    CINDER_PASSWORD=<Openstack Password> \
+    CINDER_TENANTID=<Openstack Tenant> \
+    CINDER_TENANTNAME=<Openstack Tenant Name> \
+    CINDER_REGIONNAME=<Openstack Region e.i: GRA3> \
+    CINDER_AVAILABILITYZONENAME=nova \
+    REXRAY_FSTYPE=ext4 \
+    REXRAY_PREEMPT=true
 
 ## Test your infra
 
 ### Create the persistent volume
 
-    rexray volume create docker-swarm-prod-pg_data --size=5
+    docker volume create --name docker-swarm-prod-pg_data --driver rexray/cinder:edge --opt size=5
 
 You can see the volume on each swarm node
-
-    rexray volume ls
-
-![volume list](https://lh3.googleusercontent.com/4PfbG_RwFlC-VYNtCJvsYsWJJcZsYliq4LckozH_Vnh8rl7Zx3lAx4psv1dLa5zwraM5muNfpgk5N9jr15lkzqcUyAHc8sTXlzeoLDcGPkRz26usH_Rw3gtEzzVgppI9JtB3jN2KpDZ7YrUiZ4RbYgGXo4pSYtmQ2bdlAtEcRhtCM1y_DqENyYdR-BvQrs-naVlXLFvC08wLIzKNVDfQR5VMNSncJu7lqXC8sH6yul84f0koX5JTIPjXXD-YmSFx38_MhkXGiUCgH_QwRWuD9PiXBcwT9yKpo_4gOryO9ciNzUhjp7hvCOuw5sYpTEhKtmyAVG7KzlKTEOBVvzfoQvG6ckHEZtfPqlj5DuSHA5VudyV61DzGo4KF1WQznb7ooCrnrxacMXsbeOKCyfm9mkMh_OsA0OQg_ikUBGLsZBDbilSw-ddUT6Unjt8sndVFm4XtBrnnclytG_DKneFt5qMEp9gD_4rgKv_VMLh1-CYviHmZI3gFyGO5bsQ_krFu8M_epdsNJsCQKpgVyWLAMqDc9PjkHEroiMR81W52XB3YKC7HHTh3GKHOuFrjsiAb8BB1lsNFYxzWeIlg7BjJelQuq8DbW61ebMlwIv1QgJiZvmo1sd7KYS831e16l2Z8e-hbrkCV7zCRdr50sR02yB3llxP2Z_N9=w748-h223-no)
-
-Same with the docker volume list command
 
     docker volume ls
 
@@ -182,7 +162,7 @@ Same with the docker volume list command
 
 ### Create a test container with the persistent volume attached
 
-    docker service create --replicas 1 --name pg -e POSTGRES_PASSWORD=mysecretpassword --mount type=volume,source=docker-swarm-prod-pg_data,target=/var/lib/postgresql/data,volume-driver=rexray --constraint 'node.role==worker' postgres
+    docker service create --replicas 1 --name pg -e POSTGRES_PASSWORD=mysecretpassword --mount type=volume,source=docker-swarm-prod-pg_data,target=/var/lib/postgresql/data,volume-driver=rexray/cinder:edge --constraint 'node.role==worker' postgres
 
 This container will start on the worker node (due to the constraint)
 
